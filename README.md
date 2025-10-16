@@ -27,3 +27,10 @@ You can check out the [create-t3-app GitHub repository](https://github.com/t3-os
 ## How do I deploy this?
 
 Follow our deployment guides for [Vercel](https://create.t3.gg/en/deployment/vercel), [Netlify](https://create.t3.gg/en/deployment/netlify) and [Docker](https://create.t3.gg/en/deployment/docker) for more information.
+
+### Notes
+
+- We're gonna be using trpc prefetch and then passing it on to the client + the query state (otherwise you just have the data but you can't invalidate cache, use callbacks, or anything related to tanstack)
+  => Note that Antonio does it in a certain way, but I'm sure that T3 team has a "better" way of doing it
+  => Yeah they do, with the HydrateClient helper component
+- Ok so code Rabbit in the trpc setup part seems pretty useful, especially for trpc endpoints where you might do smth like `findMany()` and you forget to either add a limit or pagination
