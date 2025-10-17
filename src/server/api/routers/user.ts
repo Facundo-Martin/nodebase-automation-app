@@ -1,7 +1,7 @@
 import { z } from "zod";
 
 import { createTRPCRouter, publicProcedure } from "@/server/api/trpc";
-import { posts, users as usersTable } from "@/server/db/schema";
+import { posts, user as usersTable } from "@/server/db/schema";
 import { db } from "@/server/db";
 import { eq } from "drizzle-orm";
 
