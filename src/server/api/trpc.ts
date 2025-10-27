@@ -6,11 +6,14 @@
  * TL;DR - This is where all the tRPC server stuff is created and plugged in. The pieces you will
  * need to use are documented accordingly near the end.
  */
-import { initTRPC } from "@trpc/server";
+import { initTRPC, TRPCError } from "@trpc/server";
 import superjson from "superjson";
 import { ZodError } from "zod";
 
 import { db } from "@/server/db";
+import { eq } from "drizzle-orm";
+import { users } from "../db/schema";
+import { auth } from "@clerk/nextjs/server";
 
 /**
  * 1. CONTEXT
@@ -25,10 +28,15 @@ import { db } from "@/server/db";
  * @see https://trpc.io/docs/server/context
  */
 export const createTRPCContext = async (opts: { headers: Headers }) => {
-	return {
-		db,
-		...opts,
-	};
+  const { userId: clerkUserId, ...rest } = await auth();
+  return {
+    db,
+    ...opts,
+    auth: {
+      clerkUserId,
+      ...rest,
+    },
+  };
 };
 
 /**
@@ -39,17 +47,17 @@ export const createTRPCContext = async (opts: { headers: Headers }) => {
  * errors on the backend.
  */
 const t = initTRPC.context<typeof createTRPCContext>().create({
-	transformer: superjson,
-	errorFormatter({ shape, error }) {
-		return {
-			...shape,
-			data: {
-				...shape.data,
-				zodError:
-					error.cause instanceof ZodError ? error.cause.flatten() : null,
-			},
-		};
-	},
+  transformer: superjson,
+  errorFormatter({ shape, error }) {
+    return {
+      ...shape,
+      data: {
+        ...shape.data,
+        zodError:
+          error.cause instanceof ZodError ? error.cause.flatten() : null,
+      },
+    };
+  },
 });
 
 /**
@@ -80,20 +88,20 @@ export const createTRPCRouter = t.router;
  * network latency that would occur in production but not in local development.
  */
 const timingMiddleware = t.middleware(async ({ next, path }) => {
-	const start = Date.now();
+  const start = Date.now();
 
-	if (t._config.isDev) {
-		// artificial delay in dev
-		const waitMs = Math.floor(Math.random() * 400) + 100;
-		await new Promise((resolve) => setTimeout(resolve, waitMs));
-	}
+  if (t._config.isDev) {
+    // artificial delay in dev
+    const waitMs = Math.floor(Math.random() * 400) + 100;
+    await new Promise((resolve) => setTimeout(resolve, waitMs));
+  }
 
-	const result = await next();
+  const result = await next();
 
-	const end = Date.now();
-	console.log(`[TRPC] ${path} took ${end - start}ms to execute`);
+  const end = Date.now();
+  console.log(`[TRPC] ${path} took ${end - start}ms to execute`);
 
-	return result;
+  return result;
 });
 
 /**
@@ -104,3 +112,58 @@ const timingMiddleware = t.middleware(async ({ next, path }) => {
  * are logged in.
  */
 export const publicProcedure = t.procedure.use(timingMiddleware);
+
+/**
+ * Helper function for checking whether the user is authed or not
+ */
+const isAuthed = t.middleware(({ next, ctx }) => {
+  if (!ctx.auth.clerkUserId) {
+    throw new TRPCError({ code: "UNAUTHORIZED" });
+  }
+
+  return next({
+    ctx: {
+      ...ctx,
+      auth: {
+        ...ctx.auth,
+        clerkUserId: ctx.auth.clerkUserId,
+      },
+    },
+  });
+});
+
+const withUser = t.middleware(async ({ next, ctx }) => {
+  if (!ctx.auth.clerkUserId) {
+    throw new TRPCError({
+      code: "INTERNAL_SERVER_ERROR",
+      message: "clerkUserId should be defined",
+    });
+  }
+
+  const [user] = await ctx.db
+    .select()
+    .from(users)
+    .where(eq(users.clerkId, ctx.auth.clerkUserId));
+
+  if (!user) {
+    throw new TRPCError({
+      code: "NOT_FOUND",
+      message: "User not found in database",
+    });
+  }
+
+  return next({
+    ctx: {
+      ...ctx,
+      user,
+    },
+  });
+});
+
+/**
+ * Protected (authenticated) procedure with rate limiting
+ */
+export const protectedProcedure = t.procedure
+  .use(timingMiddleware)
+  .use(isAuthed)
+  .use(withUser);
