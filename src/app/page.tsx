@@ -3,10 +3,9 @@ import Link from "next/link";
 
 import { LatestPost } from "@/app/_components/post";
 import { HydrateClient, api } from "@/trpc/server";
-import { authClient } from "@/lib/auth-client";
+import { UserButton } from "@clerk/nextjs";
 
-export default async function Home() {
-  const { data } = authClient.useSession();
+export default function Home() {
   // const hello = await api.post.hello({ text: "from tRPC" });
 
   // void api.post.getLatest.prefetch();
@@ -18,6 +17,7 @@ export default async function Home() {
         <h1 className="font-extrabold text-5xl tracking-tight sm:text-[5rem]">
           Create <span className="text-[hsl(280,100%,70%)]">T3</span> App
         </h1>
+        <UserButton />
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:gap-8">
           <Link
             className="flex max-w-xs flex-col gap-4 rounded-xl bg-white/10 p-4 hover:bg-white/20"
@@ -29,8 +29,6 @@ export default async function Home() {
               Just the basics - Everything you need to know to set up your
               database and authentication.
             </div>
-
-            <p>{JSON.stringify(data)}</p>
           </Link>
           <Link
             className="flex max-w-xs flex-col gap-4 rounded-xl bg-white/10 p-4 hover:bg-white/20"
