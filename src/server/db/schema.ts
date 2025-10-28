@@ -1,16 +1,14 @@
 import {
   pgTable,
-  serial,
   text,
   varchar,
   boolean,
   timestamp,
-  integer,
   pgEnum,
   uniqueIndex,
+  uuid,
 } from "drizzle-orm/pg-core";
 import { relations, sql } from "drizzle-orm";
-import { uuid } from "zod";
 
 const timestamps = {
   updated_at: timestamp(),
@@ -23,7 +21,7 @@ export const roleEnum = pgEnum("role", ["USER", "ADMIN"]);
 export const users = pgTable(
   "user",
   {
-    id: text("id").primaryKey(),
+    id: uuid("id").defaultRandom().primaryKey(),
     clerkId: text("clerk_id").unique().notNull(),
     name: text("name").notNull(),
     email: text("email").notNull().unique(),
@@ -36,20 +34,20 @@ export const users = pgTable(
   (t) => [uniqueIndex("clerk_id_idx").on(t.clerkId)]
 );
 
-export const posts = pgTable("Post", {
-  id: serial("id").primaryKey(),
+export const posts = pgTable("post", {
+  id: uuid("id").defaultRandom().primaryKey(),
   title: varchar("title", { length: 255 }).notNull(),
   published: boolean("published").notNull().default(false),
-  authorId: integer("authorId")
+  authorId: uuid("authorId")
     .notNull()
     .references(() => users.id),
   ...timestamps,
 });
 
 export const workflows = pgTable("workflow", {
-  id: serial("id").primaryKey(),
+  id: uuid("id").defaultRandom().primaryKey(),
   name: text("name").notNull(),
-  authorId: integer("authorId")
+  authorId: uuid("authorId")
     .notNull()
     .references(() => users.id),
 });

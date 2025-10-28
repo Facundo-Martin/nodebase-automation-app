@@ -12,6 +12,6 @@ export const workflowRouter = createTRPCRouter({
       },
     });
 
-    return workflow;
+    return { success: true, message: "Job queued" };
   }),
 });
