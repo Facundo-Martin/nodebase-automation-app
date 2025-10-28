@@ -10,6 +10,7 @@ import {
   uniqueIndex,
 } from "drizzle-orm/pg-core";
 import { relations, sql } from "drizzle-orm";
+import { uuid } from "zod";
 
 const timestamps = {
   updated_at: timestamp(),
@@ -45,13 +46,29 @@ export const posts = pgTable("Post", {
   ...timestamps,
 });
 
+export const workflows = pgTable("workflow", {
+  id: serial("id").primaryKey(),
+  name: text("name").notNull(),
+  authorId: integer("authorId")
+    .notNull()
+    .references(() => users.id),
+});
+
 export const usersRelations = relations(users, ({ many }) => ({
   posts: many(posts),
+  workflows: many(workflows),
 }));
 
 export const postsRelations = relations(posts, ({ one }) => ({
   author: one(users, {
     fields: [posts.authorId],
+    references: [users.id],
+  }),
+}));
+
+export const workflowsRelations = relations(workflows, ({ one }) => ({
+  user: one(users, {
+    fields: [workflows.authorId],
     references: [users.id],
   }),
 }));

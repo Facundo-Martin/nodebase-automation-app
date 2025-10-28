@@ -34,3 +34,14 @@ Follow our deployment guides for [Vercel](https://create.t3.gg/en/deployment/ver
   => Note that Antonio does it in a certain way, but I'm sure that T3 team has a "better" way of doing it
   => Yeah they do, with the HydrateClient helper component
 - Ok so code Rabbit in the trpc setup part seems pretty useful, especially for trpc endpoints where you might do smth like `findMany()` and you forget to either add a limit or pagination
+
+### Features
+
+- Clerk auth with webhook and protected procedure context
+- Custom theming using tweakcn
+
+### TODOs:
+
+- Add Clerk webhooks
+- Add Clerk custom sign in/up page (logo + project title without slugs)
+- Add Cloudflared persisting tunnels (or ngrok with free tier, idk)

@@ -1,12 +1,17 @@
 "use client";
+
 import Link from "next/link";
 
 import { LatestPost } from "@/app/_components/post";
-import { HydrateClient, api } from "@/trpc/server";
 import { UserButton } from "@clerk/nextjs";
+import { api } from "@/trpc/react";
+import { Button } from "@/components/ui/button";
 
 export default function Home() {
   // const hello = await api.post.hello({ text: "from tRPC" });
+  const testWorkflow = api.workflow.test.useMutation({
+    onSuccess: () => alert("workflow called successfully"),
+  });
 
   // void api.post.getLatest.prefetch();
 
@@ -43,12 +48,12 @@ export default function Home() {
           </Link>
         </div>
         <div className="flex flex-col items-center gap-2">
-          {/* <p className="text-2xl text-white">
-              {hello ? hello.greeting : "Loading tRPC query..."}
-            </p> */}
+          <Button type="button" onClick={() => testWorkflow.mutate()}>
+            Test workflow
+          </Button>
         </div>
 
-        <LatestPost />
+        {/* <LatestPost /> */}
       </div>
     </main>
     // </HydrateClient>
