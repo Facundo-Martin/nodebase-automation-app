@@ -46,3 +46,4 @@ Follow our deployment guides for [Vercel](https://create.t3.gg/en/deployment/ver
 - Add Clerk custom sign in/up page (logo + project title without slugs)
 - Add Cloudflared persisting tunnels (or ngrok with free tier, idk)
 - Maybe add concurrently or mprocs to run both next and inngest with a single command => mprocs looks cool! and has a Turbo-like process manager
+- Look into Inngest AgentKit instead of Vercel AI

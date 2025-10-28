@@ -6,10 +6,7 @@ import { inngest } from "@/lib/inngest";
 export const workflowRouter = createTRPCRouter({
   test: publicProcedure.mutation(async ({ ctx, input }) => {
     const workflow = await inngest.send({
-      name: "test/hello.world",
-      data: {
-        email: "testemail@gmail.com",
-      },
+      name: "execute/ai",
     });
 
     return { success: true, message: "Job queued" };
