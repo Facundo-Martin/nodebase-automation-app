@@ -2,9 +2,9 @@ import { inngest } from "@/lib/inngest";
 import { db } from "../db";
 import { workflows } from "../db/schema";
 
-export const helloWorld = inngest.createFunction(
-  { id: "hello-world" },
-  { event: "test/hello.world" },
+export const execute = inngest.createFunction(
+  { id: "execute-ai" },
+  { event: "execute/ai" },
   async ({ event, step }) => {
     await step.sleep("wait-a-moment", "1s");
     await step.run("create-workflow", async () => {

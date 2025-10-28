@@ -6,11 +6,16 @@ import { LatestPost } from "@/app/_components/post";
 import { UserButton } from "@clerk/nextjs";
 import { api } from "@/trpc/react";
 import { Button } from "@/components/ui/button";
+import { toast } from "sonner";
 
 export default function Home() {
   // const hello = await api.post.hello({ text: "from tRPC" });
   const testWorkflow = api.workflow.test.useMutation({
-    onSuccess: () => alert("workflow called successfully"),
+    onSuccess: () => toast.success("Workflow called successfully"),
+  });
+
+  const testAi = api.user.generateText.useMutation({
+    onSuccess: () => toast.success("AI text generation tested successfully"),
   });
 
   // void api.post.getLatest.prefetch();
@@ -52,6 +57,16 @@ export default function Home() {
             Test workflow
           </Button>
         </div>
+
+        <Button type="button" onClick={() => testAi.mutate()}>
+          Test AI text generation
+        </Button>
+        {testAi.data && (
+          <div>
+            <p>Text generation:</p>
+            <p>{JSON.stringify(testAi.data)}</p>
+          </div>
+        )}
 
         {/* <LatestPost /> */}
       </div>

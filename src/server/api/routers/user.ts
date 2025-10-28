@@ -1,9 +1,15 @@
 import { z } from "zod";
 
-import { createTRPCRouter, publicProcedure } from "@/server/api/trpc";
-import { posts, users as usersTable } from "@/server/db/schema";
-import { db } from "@/server/db";
+import {
+  createTRPCRouter,
+  protectedProcedure,
+  publicProcedure,
+} from "@/server/api/trpc";
+import { users as usersTable } from "@/server/db/schema";
 import { eq } from "drizzle-orm";
+
+import { google } from "@ai-sdk/google";
+import { generateText } from "ai";
 
 export const userRouter = createTRPCRouter({
   get: publicProcedure
@@ -20,5 +26,13 @@ export const userRouter = createTRPCRouter({
     const users = await ctx.db.select().from(usersTable);
 
     return users;
+  }),
+  generateText: publicProcedure.mutation(async () => {
+    const { text } = await generateText({
+      model: google("gemini-2.5-flash"),
+      prompt: "Write a vegetarian lasagna recipe for 4 people.",
+    });
+    console.log("Generated text:", text);
+    return text;
   }),
 });
