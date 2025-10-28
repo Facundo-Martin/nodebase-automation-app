@@ -18,7 +18,9 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
+    "@ai-sdk/anthropic": "^2.0.38",
     "@ai-sdk/google": "^2.0.24",
+    "@ai-sdk/openai": "^2.0.56",
     "@clerk/nextjs": "^6.34.0",
     "@hookform/resolvers": "^5.2.2",
     "@radix-ui/react-accordion": "^1.2.12",
