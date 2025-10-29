@@ -15,6 +15,8 @@ export default function Page() {
   const [hasSentError, setHasSentError] = useState(false);
   const [isConnected, setIsConnected] = useState(true);
 
+  Sentry.logger.info("User triggered test log", { log_source: "sentry_test" });
+
   useEffect(() => {
     async function checkConnectivity() {
       const result = await Sentry.diagnoseSdkConnectivity();
@@ -69,11 +71,15 @@ export default function Page() {
         <button
           type="button"
           onClick={async () => {
+            Sentry.logger.info("User triggered test log", {
+              log_source: "sentry_test",
+            });
             await Sentry.startSpan(
               {
                 name: "Example Frontend/Backend Span",
                 op: "test",
               },
+
               async () => {
                 const res = await fetch("/api/sentry-example-api");
                 if (!res.ok) {
