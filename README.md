@@ -39,6 +39,8 @@ Follow our deployment guides for [Vercel](https://create.t3.gg/en/deployment/ver
 
 - Clerk auth with webhook and protected procedure context
 - Custom theming using tweakcn
+- LLMs monitoring via Sentry AI insights
+- Error monitoring via Sentry
 
 ### TODOs:
 

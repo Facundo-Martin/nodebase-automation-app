@@ -8,14 +8,6 @@ import * as Sentry from "@sentry/nextjs";
 Sentry.init({
   dsn: "https://7c1f3d9ce629759c97bd1c3e8561f652@o4507376510828544.ingest.us.sentry.io/4510272957775872",
 
-  integrations: [
-    // Add the Vercel AI SDK integration to sentry.server.config.ts
-    Sentry.vercelAIIntegration({
-      recordInputs: true,
-      recordOutputs: true,
-    }),
-  ],
-
   // Tracing must be enabled for agent monitoring to work
   // Define how likely traces are sampled. Adjust this value in production, or use tracesSampler for greater control.
   tracesSampleRate: 1,
