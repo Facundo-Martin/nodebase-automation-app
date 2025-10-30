@@ -23,8 +23,6 @@ import {
   SidebarMenuItem,
 } from "@/components/ui/sidebar";
 
-import { useAuth } from "@clerk/nextjs";
-
 const menuItems = [
   {
     title: "Main",
@@ -50,7 +48,6 @@ const menuItems = [
 
 // TODO: Add auth methods (Sign in, checkout, etc)
 export const AppSidebar = () => {
-  const auth = useAuth();
   const router = useRouter();
   const pathname = usePathname();
   const hasActiveSubscription = false;
@@ -130,7 +127,7 @@ export const AppSidebar = () => {
             <SidebarMenuButton
               tooltip="Sign out"
               className="h-10 gap-x-4 px-4"
-              onClick={() => auth.signOut()}
+              onClick={() => null}
             >
               <LogOutIcon className="h-4 w-4" />
               <span>Sign out</span>

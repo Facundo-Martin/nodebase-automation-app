@@ -12,8 +12,9 @@ import { ZodError } from "zod";
 
 import { db } from "@/server/db";
 import { eq } from "drizzle-orm";
-import { users } from "../db/schema";
-import { auth } from "@clerk/nextjs/server";
+import { auth } from "@/lib/auth-server";
+import { headers } from "next/headers";
+import { user as userTable } from "../db/schema";
 
 /**
  * 1. CONTEXT
@@ -28,14 +29,14 @@ import { auth } from "@clerk/nextjs/server";
  * @see https://trpc.io/docs/server/context
  */
 export const createTRPCContext = async (opts: { headers: Headers }) => {
-  const { userId: clerkUserId, ...rest } = await auth();
+  const session = await auth.api.getSession({
+    headers: await headers(),
+  });
+
   return {
     db,
     ...opts,
-    auth: {
-      clerkUserId,
-      ...rest,
-    },
+    session,
   };
 };
 
@@ -117,53 +118,21 @@ export const publicProcedure = t.procedure.use(timingMiddleware);
  * Helper function for checking whether the user is authed or not
  */
 const isAuthed = t.middleware(({ next, ctx }) => {
-  if (!ctx.auth.clerkUserId) {
-    throw new TRPCError({ code: "UNAUTHORIZED" });
-  }
-
-  return next({
-    ctx: {
-      ...ctx,
-      auth: {
-        ...ctx.auth,
-        clerkUserId: ctx.auth.clerkUserId,
-      },
-    },
-  });
-});
-
-const withUser = t.middleware(async ({ next, ctx }) => {
-  if (!ctx.auth.clerkUserId) {
+  if (!ctx.session?.user) {
     throw new TRPCError({
-      code: "INTERNAL_SERVER_ERROR",
-      message: "clerkUserId should be defined",
-    });
-  }
-
-  const [user] = await ctx.db
-    .select()
-    .from(users)
-    .where(eq(users.clerkId, ctx.auth.clerkUserId));
-
-  if (!user) {
-    throw new TRPCError({
-      code: "NOT_FOUND",
-      message: "User not found in database",
+      code: "UNAUTHORIZED",
+      message: "User is not authenticated",
     });
   }
 
   return next({
-    ctx: {
-      ...ctx,
-      user,
-    },
+    ctx,
   });
 });
 
 /**
- * Protected (authenticated) procedure with rate limiting
+ * Protected (authenticated) procedure
  */
 export const protectedProcedure = t.procedure
   .use(timingMiddleware)
-  .use(isAuthed)
-  .use(withUser);
+  .use(isAuthed);
