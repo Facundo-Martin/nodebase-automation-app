@@ -1,10 +1,11 @@
 import { db } from "@/server/db";
 import { betterAuth } from "better-auth";
 import { drizzleAdapter } from "better-auth/adapters/drizzle";
-import { magicLink } from "better-auth/plugins";
-import { phoneNumber } from "better-auth/plugins";
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
+
+import { polarClient } from "./polar";
+import { polar, checkout, portal } from "@polar-sh/better-auth";
 
 const baseAuth = betterAuth({
   database: drizzleAdapter(db, {
@@ -20,6 +21,24 @@ const baseAuth = betterAuth({
       clientSecret: process.env.GITHUB_CLIENT_SECRET as string,
     },
   },
+  plugins: [
+    polar({
+      client: polarClient,
+      createCustomerOnSignUp: true,
+      use: [
+        checkout({
+          products: [
+            {
+              productId: "84e4d74d-d163-45da-8516-12a3af8dbee4",
+              slug: "nodebase-pro",
+            },
+          ],
+          successUrl: process.env.POLAR_SUCCESS_URL,
+          authenticatedUsersOnly: true,
+        }),
+      ],
+    }),
+  ],
 });
 
 /**
