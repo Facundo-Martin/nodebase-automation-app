@@ -5,7 +5,7 @@ import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 
 import { polarClient } from "./polar";
-import { polar, checkout, portal } from "@polar-sh/better-auth";
+import { polar, checkout, portal, usage } from "@polar-sh/better-auth";
 
 const baseAuth = betterAuth({
   database: drizzleAdapter(db, {
@@ -36,6 +36,8 @@ const baseAuth = betterAuth({
           successUrl: process.env.POLAR_SUCCESS_URL,
           authenticatedUsersOnly: true,
         }),
+        portal(),
+        usage(),
       ],
     }),
   ],

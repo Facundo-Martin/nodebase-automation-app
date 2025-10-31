@@ -22,6 +22,8 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
 } from "@/components/ui/sidebar";
+import { authClient } from "@/lib/auth-client";
+import { useHasActiveSubscription } from "@/hooks/use-subscription";
 
 const menuItems = [
   {
@@ -50,8 +52,7 @@ const menuItems = [
 export const AppSidebar = () => {
   const router = useRouter();
   const pathname = usePathname();
-  const hasActiveSubscription = false;
-  const isLoading = false;
+  const { hasActiveSubscription, isLoading } = useHasActiveSubscription();
 
   return (
     <Sidebar collapsible="icon">
@@ -106,7 +107,7 @@ export const AppSidebar = () => {
               <SidebarMenuButton
                 tooltip="Upgade to Pro"
                 className="h-10 gap-x-4 px-4"
-                onClick={() => null}
+                onClick={() => authClient.checkout({ slug: "nodebase-pro" })}
               >
                 <StarIcon className="h-4 w-4" />
                 <span>Upgrade to Pro</span>
@@ -117,7 +118,7 @@ export const AppSidebar = () => {
             <SidebarMenuButton
               tooltip="Billing Portal"
               className="h-10 gap-x-4 px-4"
-              onClick={() => null}
+              onClick={() => authClient.customer.portal()}
             >
               <CreditCardIcon className="h-4 w-4" />
               <span>Billing Portal</span>
@@ -127,7 +128,7 @@ export const AppSidebar = () => {
             <SidebarMenuButton
               tooltip="Sign out"
               className="h-10 gap-x-4 px-4"
-              onClick={() => null}
+              onClick={() => authClient.signOut()}
             >
               <LogOutIcon className="h-4 w-4" />
               <span>Sign out</span>
