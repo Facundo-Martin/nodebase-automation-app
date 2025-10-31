@@ -117,7 +117,7 @@ export const publicProcedure = t.procedure.use(timingMiddleware);
  * Helper function for checking whether the user is authed or not
  */
 const isAuthed = t.middleware(({ next, ctx }) => {
-  if (!ctx.session?.user) {
+  if (!ctx.session || !ctx.session.user) {
     throw new TRPCError({
       code: "UNAUTHORIZED",
       message: "User is not authenticated",
@@ -125,7 +125,10 @@ const isAuthed = t.middleware(({ next, ctx }) => {
   }
 
   return next({
-    ctx,
+    ctx: {
+      ...ctx,
+      session: ctx.session,
+    },
   });
 });
 

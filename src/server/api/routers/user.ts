@@ -2,10 +2,9 @@ import { z } from "zod";
 
 import {
   createTRPCRouter,
-  protectedProcedure,
   publicProcedure,
 } from "@/server/api/trpc";
-import { users as usersTable } from "@/server/db/schema";
+import { user as usersTable } from "@/server/db/schema";
 import { eq } from "drizzle-orm";
 
 import { google } from "@ai-sdk/google";
