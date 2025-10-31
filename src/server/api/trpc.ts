@@ -11,10 +11,9 @@ import superjson from "superjson";
 import { ZodError } from "zod";
 
 import { db } from "@/server/db";
-import { eq } from "drizzle-orm";
 import { auth } from "@/lib/auth-server";
 import { headers } from "next/headers";
-import { user as userTable } from "../db/schema";
+import { polarClient } from "@/lib/polar";
 
 /**
  * 1. CONTEXT
@@ -131,8 +130,37 @@ const isAuthed = t.middleware(({ next, ctx }) => {
 });
 
 /**
+ * Helper function for checking whether the user is subscribed to the premium version or not
+ */
+const isPremiumMember = t.middleware(async ({ next, ctx }) => {
+  const customer = await polarClient.customers.getStateExternal({
+    // biome-ignore lint: middleware is chained after protected procedure so we know for a fact that there's an active session
+    externalId: ctx.session!.user.id,
+  });
+
+  if (
+    !customer.activeSubscriptions ||
+    customer.activeSubscriptions.length === 0
+  ) {
+    throw new TRPCError({
+      code: "FORBIDDEN",
+      message: "Active subscription required",
+    });
+  }
+
+  return next({
+    ctx: {
+      ...ctx,
+      customer,
+    },
+  });
+});
+
+/**
  * Protected (authenticated) procedure
  */
 export const protectedProcedure = t.procedure
   .use(timingMiddleware)
   .use(isAuthed);
+
+export const premiumProcedure = protectedProcedure.use(isPremiumMember);
